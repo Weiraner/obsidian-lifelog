@@ -1,0 +1,316 @@
+{
+ "date": "2026-06-10",
+ "blocks": [
+  {
+   "start": "00:00:00",
+   "end": "09:00:22",
+   "label": "睡眠",
+   "category": "睡眠",
+   "detail": "醒来",
+   "proj": "",
+   "background": false,
+   "inferred": true,
+   "confidence": "high",
+   "open_end": false,
+   "note": "醒了",
+   "attachments": []
+  },
+  {
+   "start": "09:00:22",
+   "end": "09:30:40",
+   "label": "赖床",
+   "category": "睡眠",
+   "detail": "醒了但未起",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "醒了",
+   "attachments": []
+  },
+  {
+   "start": "09:30:40",
+   "end": "10:00:13",
+   "label": "吃饭",
+   "category": "生活",
+   "detail": "食堂吃鸡蛋灌饼",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "**8 食堂 鸡蛋灌饼早饭**",
+   "attachments": []
+  },
+  {
+   "start": "10:00:13",
+   "end": "11:30:38",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "写后端，完成订单接口",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "继续写后端，完成了订单相关的接口",
+   "attachments": []
+  },
+  {
+   "start": "11:30:38",
+   "end": "12:30:55",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "补单元测试并跑通",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "给核心接口补了一些单元测试，跑通了",
+   "attachments": []
+  },
+  {
+   "start": "12:30:55",
+   "end": "13:30:27",
+   "label": "吃饭",
+   "category": "生活",
+   "detail": "食堂吃排骨饭",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "**15 食堂 排骨饭午饭**",
+   "attachments": []
+  },
+  {
+   "start": "13:30:27",
+   "end": "13:50:44",
+   "label": "通勤",
+   "category": "生活",
+   "detail": "约同学去图书馆",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "约了同学去图书馆一起赶项目",
+   "attachments": []
+  },
+  {
+   "start": "13:50:44",
+   "end": "14:10:18",
+   "label": "通勤",
+   "category": "生活",
+   "detail": "坐校车去图书馆",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "**3 公交 校车去图书馆**",
+   "attachments": []
+  },
+  {
+   "start": "14:10:18",
+   "end": "16:00:09",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "与同学对前后端接口约定",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "和同学汇合，一起对了下前后端的接口约定",
+   "attachments": []
+  },
+  {
+   "start": "16:00:09",
+   "end": "17:30:33",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "联调登录鉴权，帮看前端bug",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "一起把登录鉴权部分联调通了，顺便帮他看了个前端的 bug",
+   "attachments": []
+  },
+  {
+   "start": "17:30:33",
+   "end": "18:30:52",
+   "label": "线下娱乐",
+   "category": "线下娱乐",
+   "detail": "在图书馆楼下歇会儿喝咖啡",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "在图书馆楼下歇会儿 **19 咖啡店 美式两杯** 我请的",
+   "attachments": []
+  },
+  {
+   "start": "18:30:52",
+   "end": "19:40:05",
+   "label": "吃饭",
+   "category": "生活",
+   "detail": "和同学吃饭",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "和同学吃了个饭一起回去 **40 学校附近小馆 两人份**",
+   "attachments": []
+  },
+  {
+   "start": "19:40:05",
+   "end": "20:10:50",
+   "label": "通勤",
+   "category": "生活",
+   "detail": "拼车回宿舍",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "**12 滴滴 拼车回宿舍**",
+   "attachments": []
+  },
+  {
+   "start": "20:10:50",
+   "end": "21:20:14",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "整理联调问题清单",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "到宿舍整理了今天联调的问题清单",
+   "attachments": []
+  },
+  {
+   "start": "21:20:14",
+   "end": "22:40:38",
+   "label": "打游戏",
+   "category": "网络娱乐",
+   "detail": "打了一把游戏",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "累了打了把游戏",
+   "attachments": []
+  },
+  {
+   "start": "22:40:38",
+   "end": null,
+   "label": "刷视频",
+   "category": "网络娱乐",
+   "detail": "刷视频后睡觉",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": true,
+   "note": "刷会儿视频睡了",
+   "attachments": []
+  }
+ ],
+ "presence": [
+  {
+   "person": "同学",
+   "start": "14:10:18",
+   "end": "19:40:05",
+   "open_end": false,
+   "notes": [
+    {
+     "time": "14:10:18",
+     "text": "对前后端接口约定"
+    },
+    {
+     "time": "16:00:09",
+     "text": "联调登录鉴权，帮看前端bug"
+    },
+    {
+     "time": "17:30:33",
+     "text": "一起喝咖啡"
+    },
+    {
+     "time": "18:30:52",
+     "text": "一起吃饭"
+    }
+   ]
+  }
+ ],
+ "events": [],
+ "expenses": [
+  {
+   "time": "09:30:40",
+   "amount": 8,
+   "item": "鸡蛋灌饼",
+   "category": "食物",
+   "sub": "早餐",
+   "type": "支出",
+   "channel": "食堂"
+  },
+  {
+   "time": "12:30:55",
+   "amount": 15,
+   "item": "排骨饭",
+   "category": "食物",
+   "sub": "午餐",
+   "type": "支出",
+   "channel": "食堂"
+  },
+  {
+   "time": "13:50:44",
+   "amount": 3,
+   "item": "校车",
+   "category": "交通",
+   "sub": "公交",
+   "type": "支出",
+   "channel": null
+  },
+  {
+   "time": "17:30:33",
+   "amount": 19,
+   "item": "美式两杯",
+   "category": "食物",
+   "sub": "饮料",
+   "type": "支出",
+   "channel": "咖啡店"
+  },
+  {
+   "time": "18:30:52",
+   "amount": 40,
+   "item": "两人份晚餐",
+   "category": "食物",
+   "sub": "晚餐",
+   "type": "支出",
+   "channel": "学校附近小馆"
+  },
+  {
+   "time": "19:40:05",
+   "amount": 12,
+   "item": "拼车",
+   "category": "交通",
+   "sub": "打车",
+   "type": "支出",
+   "channel": "滴滴"
+  }
+ ],
+ "daily_total": 97,
+ "daily_income": 0,
+ "open_end": true,
+ "warnings": []
+}

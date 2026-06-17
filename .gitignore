@@ -1,0 +1,17 @@
+# dependencies
+node_modules/
+
+# build output — committed on purpose: it's both the installable plugin AND
+# what makes demo-vault/.obsidian/plugins/lifelog/ work on a fresh clone.
+*.js.map
+
+# the author's REAL vault data must never enter the repo
+# (demo data lives in demo-vault/ and IS committed)
+/.data/
+data.json
+
+# os / editor
+.DS_Store
+*.log
+.idea/
+.vscode/

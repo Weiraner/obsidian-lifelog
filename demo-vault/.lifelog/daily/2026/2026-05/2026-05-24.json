@@ -1,0 +1,247 @@
+{
+ "date": "2026-05-24",
+ "generated_at": "2026-05-24T08:00:00",
+ "blocks": [
+  {
+   "start": "00:00:00",
+   "end": "10:36:00",
+   "label": "睡觉",
+   "category": "睡眠",
+   "detail": "",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "10:36:00",
+   "end": "11:36:00",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "调前端页面",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "11:36:00",
+   "end": "12:36:00",
+   "label": "找工",
+   "category": "学习工作",
+   "detail": "刷面经",
+   "proj": "实习投递",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "12:36:00",
+   "end": "14:06:00",
+   "label": "聊天",
+   "category": "社交",
+   "detail": "和朋友聊天",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "14:06:00",
+   "end": "15:36:00",
+   "label": "做饭",
+   "category": "生活",
+   "detail": "简单炒个菜",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "15:36:00",
+   "end": "16:21:00",
+   "label": "项目",
+   "category": "学习工作",
+   "detail": "调前端页面",
+   "proj": "二手书网站",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "16:21:00",
+   "end": "17:21:00",
+   "label": "杂事",
+   "category": "事务",
+   "detail": "缴费报销",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "17:21:00",
+   "end": "18:51:00",
+   "label": "刷视频",
+   "category": "网络娱乐",
+   "detail": "B站看技术分享",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "medium",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "18:51:00",
+   "end": "19:36:00",
+   "label": "咖啡店",
+   "category": "线下娱乐",
+   "detail": "和朋友坐坐",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "19:36:00",
+   "end": "20:06:00",
+   "label": "上课",
+   "category": "学习工作",
+   "detail": "看网课",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "20:06:00",
+   "end": "22:06:00",
+   "label": "看剧",
+   "category": "网络娱乐",
+   "detail": "纪录片",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "22:06:00",
+   "end": "22:51:00",
+   "label": "取快递",
+   "category": "生活",
+   "detail": "取外卖",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  },
+  {
+   "start": "22:51:00",
+   "end": "23:18:00",
+   "label": "取快递",
+   "category": "生活",
+   "detail": "取外卖",
+   "proj": "",
+   "background": false,
+   "inferred": false,
+   "confidence": "high",
+   "open_end": false,
+   "note": "",
+   "attachments": []
+  }
+ ],
+ "presence": [
+  {
+   "person": "Mia",
+   "start": "13:34:00",
+   "end": "15:33:00",
+   "open_end": false,
+   "notes": []
+  }
+ ],
+ "events": [
+  {
+   "time": "14:13:00",
+   "label": "组会确认分工",
+   "category": "学习工作",
+   "note": ""
+  }
+ ],
+ "expenses": [
+  {
+   "time": "15:45:00",
+   "amount": 23.21,
+   "item": "拼车",
+   "category": "交通",
+   "sub": "打车",
+   "type": "支出",
+   "channel": "滴滴"
+  },
+  {
+   "time": "16:19:00",
+   "amount": 78.12,
+   "item": "专业教材",
+   "category": "学习",
+   "sub": "书籍",
+   "type": "支出",
+   "channel": "网上书店"
+  },
+  {
+   "time": "21:56:00",
+   "amount": 19.46,
+   "item": "牛肉拉面",
+   "category": "食物",
+   "sub": "午餐",
+   "type": "支出",
+   "channel": "美团"
+  },
+  {
+   "time": "22:59:00",
+   "amount": 25,
+   "item": "炒饭",
+   "category": "食物",
+   "sub": "晚餐",
+   "type": "支出",
+   "channel": "饿了么"
+  }
+ ],
+ "daily_total": 145.79,
+ "daily_income": 0,
+ "open_end": false,
+ "warnings": []
+}

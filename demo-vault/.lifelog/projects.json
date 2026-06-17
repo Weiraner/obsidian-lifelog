@@ -1,0 +1,5 @@
+[
+  { "name": "二手书网站", "label": "项目", "aliases": ["课程项目", "大作业"], "status": "active" },
+  { "name": "算法刷题", "label": "刷题", "aliases": ["LeetCode", "周赛"], "status": "active" },
+  { "name": "实习投递", "label": "找工", "aliases": ["投简历", "改简历"], "status": "active" }
+]
