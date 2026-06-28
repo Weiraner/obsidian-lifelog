@@ -6,6 +6,12 @@
  * hallucinate a wall-clock time. Everything else (time math, validation) is
  * done in parser.ts. Keeping the template here as a versioned constant means the
  * prompt is reviewable in diffs like any other code.
+ *
+ * This embedded constant is the generic, shareable default. A user can keep a
+ * private, more detailed template (with personal worked examples) outside the
+ * repo as `<configDir>/prompt_template.txt`; the pipeline reads it and passes it
+ * to buildPrompt() as `ctx.template`, which then overrides this default. That way
+ * the personal prompt never ships inside the bundle.
  */
 import type { Entry, ParseConfig, Project, Taxonomy } from "./schema";
 
@@ -153,11 +159,14 @@ export function buildWatermarkInstruction(entries: Entry[], watermarkTime: strin
 export interface PromptContext {
   prevDayContext?: string;
   watermarkTime?: string | null;
+  /** Override the embedded PROMPT_TEMPLATE (e.g. a private template read from disk). */
+  template?: string;
 }
 
 export function buildPrompt(cfg: ParseConfig, entries: Entry[], ctx: PromptContext = {}): string {
   const payload = entries.map((e) => ({ i: e.i, t: e.t, c: e.c }));
-  return PROMPT_TEMPLATE.replace("{time_categories}", fmtTaxonomy(cfg.time_categories))
+  return (ctx.template || PROMPT_TEMPLATE)
+    .replace("{time_categories}", fmtTaxonomy(cfg.time_categories))
     .replace("{expense_categories}", fmtTaxonomy(cfg.expense_categories))
     .replace("{projects}", fmtProjects(cfg.projects))
     .replace("{prev_day_context}", ctx.prevDayContext || "(无前一天上下文)")

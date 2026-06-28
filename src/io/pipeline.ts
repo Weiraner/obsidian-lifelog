@@ -126,6 +126,22 @@ async function loadConfig(app: App, settings: PipelineSettings): Promise<ParseCo
   };
 }
 
+/**
+ * Optional private prompt override: `<configDir>/prompt_template.txt`. Kept out
+ * of the bundle (and the repo) so a personal, detailed template with worked
+ * examples never ships publicly. Absent / unreadable → undefined, and buildPrompt
+ * falls back to the embedded generic PROMPT_TEMPLATE.
+ */
+async function loadPromptTemplate(app: App, settings: PipelineSettings): Promise<string | undefined> {
+  const path = `${configDir(settings.dataRoot)}/prompt_template.txt`;
+  try {
+    const t = await app.vault.adapter.read(path);
+    return t.trim() ? t : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Best-effort date for a note: frontmatter → filename → path-year + MM-DD → today. */
 function resolveDate(app: App, file: TFile): string {
   const fm = app.metadataCache.getFileCache(file)?.frontmatter as Record<string, unknown> | undefined;
@@ -236,7 +252,8 @@ async function runParse(app: App, file: TFile, date: string, settings: PipelineS
   const cfg = await loadConfig(app, settings);
   const watermarkTime = opts.watermarkTime ?? null;
   const prevDayContext = await loadPrevDayContext(app, settings, date);
-  const basePrompt = buildPrompt(cfg, entries, { prevDayContext, watermarkTime });
+  const template = await loadPromptTemplate(app, settings);
+  const basePrompt = buildPrompt(cfg, entries, { prevDayContext, watermarkTime, template });
 
   // Retry once, feeding the validation error back to the model (faithful to
   // parse_log.py's two-attempt loop).

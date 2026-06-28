@@ -365,7 +365,7 @@ class LifelogSettingTab extends PluginSettingTab {
     if (isCli) {
       new Setting(containerEl)
         .setName("Claude 二进制路径")
-        .setDesc("留空则用 PATH 上的 `claude`。当前 .data 配置指向 /Users/shiyasu/.local/bin/claude。")
+        .setDesc("留空则用 PATH 上的 `claude`;若 claude 不在 PATH 上,填它的绝对路径(如 ~/.local/bin/claude)。")
         .addText((t) => t.setValue(s.llm.claudeBin ?? "").setPlaceholder("claude").onChange(async (v) => { s.llm.claudeBin = v.trim(); await this.plugin.saveSettings(); }));
 
       new Setting(containerEl)
