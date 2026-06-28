@@ -6,7 +6,7 @@
  * loose JSON are parsed correctly for both kinds.
  */
 import { describe, expect, it } from "vitest";
-import { buildRequest, parseJsonLoose, parseResponse, resolveProvider, type LlmSettings } from "../src/io/llm-core";
+import { buildCliInvocation, buildRequest, parseCliResponse, parseJsonLoose, parseResponse, resolveProvider, type LlmSettings } from "../src/io/llm-core";
 
 const base = (over: Partial<LlmSettings>): LlmSettings => ({ provider: "anthropic", apiKey: "k", model: "", baseUrl: "", ...over });
 
@@ -69,6 +69,30 @@ describe("parseResponse", () => {
     const r = parseResponse("deepseek", { model: "deepseek-chat", choices: [{ message: { content: "hello" } }], usage: { prompt_tokens: 7, completion_tokens: 3 } });
     expect(r.text).toBe("hello");
     expect(r.usage).toEqual({ model: "deepseek-chat", inputTokens: 7, outputTokens: 3 });
+  });
+});
+
+describe("claude -p (CLI provider)", () => {
+  it("resolves to the cli kind with the preset model", () => {
+    expect(resolveProvider(base({ provider: "claude-cli", apiKey: "" }))).toEqual({ kind: "cli", baseUrl: "", model: "claude-opus-4-8" });
+  });
+  it("builds `claude -p --output-format json --model <m>` and honors claudeBin override", () => {
+    const inv = buildCliInvocation(base({ provider: "claude-cli", apiKey: "", model: "claude-haiku-4-5", claudeBin: "/opt/claude" }));
+    expect(inv.bin).toBe("/opt/claude");
+    expect(inv.args).toEqual(["-p", "--output-format", "json", "--model", "claude-haiku-4-5"]);
+  });
+  it("defaults the binary to `claude` on PATH", () => {
+    expect(buildCliInvocation(base({ provider: "claude-cli", apiKey: "" })).bin).toBe("claude");
+  });
+  it("unwraps the JSON envelope into inner result + token usage", () => {
+    const r = parseCliResponse(JSON.stringify({ result: '{"blocks":[]}', model: "claude-opus-4-8", usage: { input_tokens: 12, output_tokens: 5 } }));
+    expect(r.text).toBe('{"blocks":[]}');
+    expect(r.usage).toEqual({ model: "claude-opus-4-8", inputTokens: 12, outputTokens: 5 });
+  });
+  it("falls back to raw stdout when there is no envelope", () => {
+    const r = parseCliResponse('{"blocks":[]}');
+    expect(r.text).toBe('{"blocks":[]}');
+    expect(r.usage.inputTokens).toBe(0);
   });
 });
 

@@ -9,8 +9,8 @@
  * network; the actual HTTP call lives in llm.ts (Obsidian `requestUrl`).
  */
 
-export type ProviderId = "anthropic" | "openai" | "deepseek" | "minimax" | "glm" | "custom";
-type Kind = "anthropic" | "openai";
+export type ProviderId = "claude-cli" | "anthropic" | "openai" | "deepseek" | "minimax" | "glm" | "custom";
+type Kind = "anthropic" | "openai" | "cli";
 
 export interface ProviderPreset {
   kind: Kind;
@@ -26,6 +26,7 @@ export interface ProviderPreset {
  * settings if you want a cheaper per-day parse.)
  */
 export const PROVIDERS: Record<ProviderId, ProviderPreset> = {
+  "claude-cli": { kind: "cli", label: "Claude CLI (claude -p · 订阅,无需 API key)", baseUrl: "", model: "claude-opus-4-8" },
   anthropic: { kind: "anthropic", label: "Claude (Anthropic)", baseUrl: "https://api.anthropic.com", model: "claude-opus-4-8" },
   openai: { kind: "openai", label: "GPT (OpenAI)", baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
   deepseek: { kind: "openai", label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-chat" },
@@ -41,6 +42,10 @@ export interface LlmSettings {
   model: string;
   /** Override the preset base URL (empty = use preset default). */
   baseUrl: string;
+  /** Path to the `claude` binary (claude-cli provider only; empty = "claude" on PATH). */
+  claudeBin?: string;
+  /** Hard wall-clock cap for a single call, seconds (claude-cli only; default 300). */
+  timeoutSec?: number;
 }
 
 export interface HttpRequest {
@@ -132,6 +137,43 @@ export function parseResponse(provider: ProviderId, json: any): LlmResult {
   if (typeof text !== "string" || !text) throw new Error("OpenAI 兼容响应中没有 choices[0].message.content");
   const u = json?.usage || {};
   return { text, usage: { model: json?.model || "", inputTokens: u.prompt_tokens || 0, outputTokens: u.completion_tokens || 0 } };
+}
+
+/* ------------------------------------------------------------- claude -p (CLI) */
+
+/**
+ * Build the `claude -p` argv for a headless single-shot parse. The prompt is fed
+ * on stdin (not argv) so it can be arbitrarily large. Mirrors the original
+ * parse_log.py `call_llm`: `claude -p --output-format json --model <m>`.
+ * Pure — the actual spawn lives in llm.ts (the one impure module).
+ */
+export function buildCliInvocation(s: LlmSettings): { bin: string; args: string[] } {
+  const { model } = resolveProvider(s);
+  if (!model) throw new Error("未配置 model");
+  const bin = s.claudeBin?.trim() || "claude";
+  return { bin, args: ["-p", "--output-format", "json", "--model", model] };
+}
+
+/**
+ * Parse stdout from `claude -p --output-format json`. The CLI wraps the model's
+ * answer in an envelope `{result, model, usage:{input_tokens,output_tokens,...}}`.
+ * We return the inner `result` as `text` (still JSON-in-a-string — the pipeline
+ * runs parseJsonLoose on it, exactly like the HTTP path). Falls back to treating
+ * stdout as the raw result if the envelope is absent.
+ */
+export function parseCliResponse(stdout: string): LlmResult {
+  let outer: any = null;
+  try {
+    outer = JSON.parse(stdout);
+  } catch {
+    /* not the JSON envelope — treat stdout as the raw result below */
+  }
+  if (outer && typeof outer === "object" && !Array.isArray(outer)) {
+    const text = typeof outer.result === "string" ? outer.result : stdout;
+    const u = outer.usage || {};
+    return { text, usage: { model: outer.model || "", inputTokens: u.input_tokens || 0, outputTokens: u.output_tokens || 0 } };
+  }
+  return { text: stdout, usage: { model: "", inputTokens: 0, outputTokens: 0 } };
 }
 
 /** Tolerant JSON extraction: strip markdown fences, grab the outermost object. */
