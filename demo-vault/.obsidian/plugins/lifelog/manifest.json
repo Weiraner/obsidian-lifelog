@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "minAppVersion": "1.5.0",
   "description": "Turn plain-text daily logs into structured time-series data and visualizations — a local-first personal data system.",
-  "author": "shiyasu",
-  "authorUrl": "https://github.com/shiyasu",
+  "author": "Weiraner",
+  "authorUrl": "https://github.com/Weiraner",
   "isDesktopOnly": true
 }
