@@ -84,6 +84,22 @@ function shade(hex: string, f: number) {
   const n = parseInt(h, 16) || 0;
   return `rgb(${Math.round(((n >> 16) & 255) * f)},${Math.round(((n >> 8) & 255) * f)},${Math.round((n & 255) * f)})`;
 }
+// 朝白色混合 f(0~1):用于深色模式下把马卡龙色提亮成浅色字体,保证暗底可读。
+function tint(hex: string, f: number) {
+  let h = String(hex || "#888").replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h, 16) || 0;
+  const mix = (c: number) => Math.round(c + (255 - c) * f);
+  return `rgb(${mix((n >> 16) & 255)},${mix((n >> 8) & 255)},${mix(n & 255)})`;
+}
+// Obsidian 在 <body> 上挂 theme-dark / theme-light;据此切换字体明暗方向。
+function isDarkTheme() {
+  return typeof document !== "undefined" && document.body.classList.contains("theme-dark");
+}
+// 可读的文字色:浅色模式加深(白底),深色模式提亮(暗底)。
+function textColor(color: string) {
+  return isDarkTheme() ? tint(color, 0.45) : shade(color, 0.55);
+}
 
 // 解析时钟字符串 → 当天午夜起算分钟(可<0 或 >1440)。容错 前一天/后一天/H:MM[:SS]。
 function parseClock(s: any): number | null {
@@ -393,7 +409,7 @@ export class TimeBlockCalendar {
     const modal = el(
       "div",
       { class: "tb-modal" },
-      el("h3", { style: { color: shade(color, 0.6) } }, b.label || "(无标题)"),
+      el("h3", { style: { color: isDarkTheme() ? tint(color, 0.5) : shade(color, 0.6) } }, b.label || "(无标题)"),
       el("div", { class: "meta" }, `${b.category || ""}${b.proj ? " · " + b.proj : ""} · ${durStr}` + (b.open ? " · 开放块" : "") + (b.inferred ? " · 推断" : "") + (b.confidence === "low" ? " · 低置信" : "")),
       b.detail ? el("div", { style: { marginBottom: "6px" } }, b.detail) : null,
       b.note ? el("div", { class: "note" }, b.note) : null,
@@ -524,7 +540,7 @@ export class TimeBlockCalendar {
       left: `calc(${left}% + 8px)`,
       width: `calc(${w}% - 10px)`,
       background: hexToRgba(color, this.opacity),
-      color: shade(color, 0.55),
+      color: textColor(color),
       borderLeft: `3px solid ${color}`,
       boxShadow: `inset 0 0 0 1px ${hexToRgba(color, 0.32)}`,
       zIndex: String(u.layer || 0),
