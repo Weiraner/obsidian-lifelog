@@ -9,6 +9,7 @@
 import { App, Editor, Modal, Notice, Platform, Plugin, PluginSettingTab, Setting } from "obsidian";
 import { mount as mountExpense, type ExpenseConfig } from "./ui/expense-dashboard";
 import { mount as mountCalendar, type TimeblockConfig } from "./ui/timeblock-calendar";
+import { mount as mountStats } from "./ui/stats-dashboard";
 import { PROVIDERS, resolveProvider, type LlmSettings, type ProviderId } from "./io/llm-core";
 import { backfill, incrementalParse, parseNote, type PipelineSettings, type Watermark } from "./io/pipeline";
 
@@ -127,6 +128,18 @@ export default class LifelogPlugin extends Plugin {
       mountCalendar(container, {
         app: this.app,
         config: { ...this.settings.calendar, dataRoot: dataRootOf(o) },
+      });
+    });
+
+    this.registerMarkdownCodeBlockProcessor("lifelog-stats", (source, container) => {
+      const o = parseBlockSource(source);
+      void mountStats(container, {
+        app: this.app,
+        config: {
+          dataRoot: dataRootOf(o),
+          colors: this.settings.calendar.colors,
+          fallbackColor: this.settings.calendar.fallbackColor,
+        },
       });
     });
 

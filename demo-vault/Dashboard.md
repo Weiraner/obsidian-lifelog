@@ -13,6 +13,11 @@ enabled. Both panels read the generated demo data under `.lifelog/daily/`.
 ```lifelog-expense
 ```
 
+## 时间统计 / Time stats
+
+```lifelog-stats
+```
+
 ---
 
 *Override a data source per block with a `key: value` line, e.g.:*
