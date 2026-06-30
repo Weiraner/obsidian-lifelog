@@ -6,7 +6,7 @@
  * settings + settings tab, the two markdown code-block processors, and the
  * parse command.
  */
-import { App, Editor, Modal, Notice, Plugin, PluginSettingTab, Setting } from "obsidian";
+import { App, Editor, Modal, Notice, Platform, Plugin, PluginSettingTab, Setting } from "obsidian";
 import { mount as mountExpense, type ExpenseConfig } from "./ui/expense-dashboard";
 import { mount as mountCalendar, type TimeblockConfig } from "./ui/timeblock-calendar";
 import { PROVIDERS, resolveProvider, type LlmSettings, type ProviderId } from "./io/llm-core";
@@ -187,10 +187,17 @@ export default class LifelogPlugin extends Plugin {
     return resolveProvider(this.settings.llm).kind !== "cli";
   }
 
+  /** Prompt to add a key — on desktop the CLI is also an option, on mobile it isn't. */
+  private missingKeyMessage(): string {
+    return Platform.isDesktopApp
+      ? "Lifelog: 请先在设置里填写 API key(或切换到 Claude CLI provider)"
+      : "Lifelog: 请先在设置里填写 API key(移动端不支持 Claude CLI)";
+  }
+
   /** Incremental catch-up from the stored watermark; advances + persists it. */
   async runIncremental(verbose: boolean): Promise<void> {
     if (this.providerNeedsKey() && !this.settings.llm.apiKey) {
-      if (verbose) new Notice("Lifelog: 请先在设置里填写 API key(或切换到 Claude CLI provider)");
+      if (verbose) new Notice(this.missingKeyMessage());
       return;
     }
     const notice = verbose ? new Notice("Lifelog: 增量解析中…", 0) : null;
@@ -216,7 +223,7 @@ export default class LifelogPlugin extends Plugin {
   /** Backfill a range (or all journal days). Invoked from BackfillModal. */
   async runBackfill(opts: { from?: string; to?: string; skipExisting?: boolean }): Promise<void> {
     if (this.providerNeedsKey() && !this.settings.llm.apiKey) {
-      new Notice("Lifelog: 请先在设置里填写 API key(或切换到 Claude CLI provider)");
+      new Notice(this.missingKeyMessage());
       return;
     }
     const notice = new Notice("Lifelog: 回填中…", 0);
@@ -240,7 +247,7 @@ export default class LifelogPlugin extends Plugin {
       return;
     }
     if (this.providerNeedsKey() && !this.settings.llm.apiKey) {
-      new Notice("Lifelog: 请先在设置里填写 API key(或切换到 Claude CLI provider)");
+      new Notice(this.missingKeyMessage());
       return;
     }
     const notice = new Notice(`Lifelog: 正在解析 ${file.basename}…`, 0);
@@ -356,11 +363,21 @@ class LifelogSettingTab extends PluginSettingTab {
 
     new Setting(containerEl)
       .setName("Provider")
-      .setDesc("Claude CLI 走本地 claude -p(订阅计费,无需 API key,仅桌面端);其余走 HTTP API。")
+      .setDesc("Claude CLI 走本地 claude -p(订阅计费,无需 API key,仅桌面端);其余走 HTTP API,桌面 / 移动端通用。")
       .addDropdown((d) => {
         for (const [id, p] of Object.entries(PROVIDERS)) d.addOption(id, p.label);
         d.setValue(s.llm.provider).onChange(async (v) => { s.llm.provider = v as ProviderId; await this.plugin.saveSettings(); this.display(); });
       });
+
+    // Mobile has no subprocess: the Claude CLI provider can't run here. Flag it
+    // loudly in the settings so it's not a mystery when parsing fails.
+    if (isCli && !Platform.isDesktopApp) {
+      const warn = containerEl.createEl("p", {
+        text: "⚠️ 当前是移动端,Claude CLI(claude -p)无法运行。请改用某个 HTTP provider(如 Anthropic / OpenAI / DeepSeek 等)并填入 API key。",
+        cls: "setting-item-description",
+      });
+      warn.style.color = "var(--text-error)";
+    }
 
     if (isCli) {
       new Setting(containerEl)
