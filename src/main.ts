@@ -388,6 +388,8 @@ class LifelogSettingTab extends PluginSettingTab {
       .setDesc(`留空使用默认: ${preset.model || "(需填写)"}`)
       .addText((t) => t.setValue(s.llm.model).setPlaceholder(preset.model).onChange(async (v) => { s.llm.model = v.trim(); await this.plugin.saveSettings(); }));
 
+    this.renderColorSettings(containerEl);
+
     containerEl.createEl("h3", { text: "自动解析 / Scheduling" });
 
     new Setting(containerEl)
@@ -421,6 +423,69 @@ class LifelogSettingTab extends PluginSettingTab {
       .setName("回填")
       .setDesc("按日期范围 / 仅缺失日,全量重刷。")
       .addButton((b) => b.setButtonText("回填…").onClick(() => new BackfillModal(this.app, this.plugin).open()));
+  }
+
+  /**
+   * Two editable color lists — timeblock categories (name + color) and expense
+   * categories (name + color + icon). Each row mutates an ordered working array
+   * in place (so typing a name doesn't lose focus); the array is serialized back
+   * into the settings record on every change. Add / delete re-render the tab.
+   * Changes take effect the next time a calendar / expense view is (re)rendered.
+   */
+  private renderColorSettings(containerEl: HTMLElement): void {
+    const s = this.plugin.settings;
+    containerEl.createEl("h3", { text: "颜色 / Colors" });
+    containerEl.createEl("p", {
+      text: "时间块分类与费用分类的配色。改完重新打开(或刷新)对应的日历 / 费用视图即可生效。",
+      cls: "setting-item-description",
+    });
+
+    // —— 时间块分类 ——
+    containerEl.createEl("h4", { text: "时间块分类" });
+    const calEntries: [string, string][] = Object.entries(s.calendar.colors || {});
+    const commitCal = async () => {
+      const rec: Record<string, string> = {};
+      for (const [name, color] of calEntries) {
+        const k = name.trim();
+        if (k) rec[k] = color;
+      }
+      s.calendar.colors = rec;
+      await this.plugin.saveSettings();
+    };
+    calEntries.forEach((entry, i) => {
+      new Setting(containerEl)
+        .addText((t) => t.setValue(entry[0]).setPlaceholder("分类名").onChange(async (v) => { entry[0] = v; await commitCal(); }))
+        .addColorPicker((c) => c.setValue(entry[1] || "#cccccc").onChange(async (v) => { entry[1] = v; await commitCal(); }))
+        .addExtraButton((b) => b.setIcon("trash").setTooltip("删除").onClick(async () => { calEntries.splice(i, 1); await commitCal(); this.display(); }));
+    });
+    new Setting(containerEl).addButton((b) =>
+      b.setButtonText("＋ 新增时间块分类").onClick(async () => { calEntries.push(["", "#cccccc"]); await commitCal(); this.display(); }),
+    );
+
+    // —— 费用分类 ——
+    containerEl.createEl("h4", { text: "费用分类" });
+    const expEntries: [string, { color: string; icon: string }][] = Object.entries(s.expense.cats || {}).map(
+      ([k, v]) => [k, { color: v.color, icon: v.icon }],
+    );
+    const commitExp = async () => {
+      const rec: Record<string, { color: string; icon: string }> = {};
+      for (const [name, style] of expEntries) {
+        const k = name.trim();
+        if (k) rec[k] = { color: style.color, icon: style.icon };
+      }
+      s.expense.cats = rec;
+      await this.plugin.saveSettings();
+    };
+    expEntries.forEach((entry, i) => {
+      new Setting(containerEl)
+        .addText((t) => t.setValue(entry[0]).setPlaceholder("分类名").onChange(async (v) => { entry[0] = v; await commitExp(); }))
+        .addColorPicker((c) => c.setValue(entry[1].color || "#cccccc").onChange(async (v) => { entry[1].color = v; await commitExp(); }))
+        .addText((t) => { t.setValue(entry[1].icon).setPlaceholder("图标"); t.inputEl.style.width = "4em"; t.onChange(async (v) => { entry[1].icon = v; await commitExp(); }); })
+        .addExtraButton((b) => b.setIcon("trash").setTooltip("删除").onClick(async () => { expEntries.splice(i, 1); await commitExp(); this.display(); }));
+    });
+    new Setting(containerEl).addButton((b) =>
+      b.setButtonText("＋ 新增费用分类").onClick(async () => { expEntries.push(["", { color: "#cccccc", icon: "📦" }]); await commitExp(); this.display(); }),
+    );
   }
 }
 
