@@ -391,16 +391,29 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
     );
     const keyFn = state.trend === "day" ? (e: any) => e.date : state.trend === "week" ? (e: any) => isoWeekKey(e.date) : (e: any) => e.date.slice(0, 7);
     const agg = new Map<string, number>();
-    for (const e of data) agg.set(keyFn(e), (agg.get(keyFn(e)) || 0) + e.amount);
+    // Track each bucket's actual date span so a click can scope 明细 to exactly
+    // the records that make up the bar (precise; no empty calendar padding).
+    const bounds = new Map<string, { min: string; max: string }>();
+    for (const e of data) {
+      const k = keyFn(e);
+      agg.set(k, (agg.get(k) || 0) + e.amount);
+      const b = bounds.get(k);
+      if (!b) bounds.set(k, { min: e.date, max: e.date });
+      else {
+        if (e.date < b.min) b.min = e.date;
+        if (e.date > b.max) b.max = e.date;
+      }
+    }
     const keys = [...agg.keys()].sort();
     const maxV = Math.max(1, ...agg.values());
     const chart = el("div", { class: "exp-trend" });
     for (const k of keys) {
       const v = agg.get(k)!;
+      const b = bounds.get(k)!;
       chart.append(
         el(
           "div",
-          { class: "col", title: `${k}　${fmt(v)}` },
+          { class: "col", title: `${k}　${fmt(v)}　— 点击查看明细`, onclick: () => drillToPeriod(b.min, b.max) },
           el("div", { class: "cap" }, v >= 1000 ? (v / 1000).toFixed(1) + "k" : Math.round(v)),
           el("div", { class: "barfill", style: { height: `${Math.round((v / maxV) * 100)}px` } }),
           el("div", { class: "xlab" }, state.trend === "month" ? k.slice(2) : k.slice(5)),
@@ -438,6 +451,19 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
     state.cats = new Set([cat]);
     state.channels.clear();
     state.q = sub && sub !== "（未分）" ? sub : "";
+    state.tab = "明细";
+    render();
+  }
+
+  // Narrow the period to [from, to] (a clicked trend bar / heat cell) and jump
+  // to 明细 showing everything in it — category/channel/search drill is cleared
+  // so the detail matches the bar, which is computed across all categories.
+  function drillToPeriod(from: string, to: string) {
+    state.from = from;
+    state.to = to;
+    state.cats.clear();
+    state.channels.clear();
+    state.q = "";
     state.tab = "明细";
     render();
   }
@@ -509,7 +535,14 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
     for (const d of cells) {
       const v = dailyTotalMap.get(d) || 0;
       const lvl = v <= 0 ? 0 : Math.max(0.18, v / hmMax);
-      week.append(el("div", { class: "cell", style: { background: v <= 0 ? "var(--background-modifier-border)" : hexToRgba(ACCENT, lvl) }, title: `${d}　${fmt(v)}` }));
+      week.append(
+        el("div", {
+          class: "cell" + (v > 0 ? " hit" : ""),
+          style: { background: v <= 0 ? "var(--background-modifier-border)" : hexToRgba(ACCENT, lvl) },
+          title: v > 0 ? `${d}　${fmt(v)}　— 点击查看明细` : `${d}　${fmt(v)}`,
+          onclick: v > 0 ? () => drillToPeriod(d, d) : null,
+        }),
+      );
       if ((toDate(d).getDay() + 6) % 7 === 6) {
         grid.append(week);
         week = el("div", { class: "wk" });
@@ -870,9 +903,11 @@ function injectStyle(accent: string, UP: string) {
     .seg.sm button { border:none; background:transparent; padding:3px 11px; border-radius:7px; cursor:pointer; color:var(--text-muted); font-size:12px; }
     .seg.sm button.on { background:var(--background-primary); color:var(--text-normal); font-weight:600; }
     .exp-trend { display:flex; align-items:flex-end; gap:4px; height:140px; overflow-x:auto; padding-top:14px; }
-    .exp-trend .col { display:flex; flex-direction:column; align-items:center; flex:1 0 20px; min-width:20px; }
+    .exp-trend .col { display:flex; flex-direction:column; align-items:center; flex:1 0 20px; min-width:20px; cursor:pointer; border-radius:5px; transition:background .12s; }
+    .exp-trend .col:hover { background:var(--background-modifier-hover); }
     .exp-trend .cap { font-size:9px; color:var(--text-muted); margin-bottom:3px; }
     .exp-trend .barfill { width:62%; min-height:2px; border-radius:5px 5px 0 0; background:linear-gradient(to top, ${hexToRgba(accent, 0.55)}, ${accent}); }
+    .exp-trend .col:hover .barfill { filter:brightness(1.12); }
     .exp-trend .xlab { font-size:9px; color:var(--text-faint); margin-top:5px; white-space:nowrap; }
     .exp-stack { display:flex; width:100%; height:26px; border-radius:8px; overflow:hidden; background:var(--background-modifier-border); }
     .exp-stack .seg { height:100%; min-width:2px; transition:filter .12s; cursor:pointer; }
@@ -900,6 +935,8 @@ function injectStyle(accent: string, UP: string) {
     .exp-heat { display:flex; gap:3px; overflow-x:auto; padding:6px 0 4px; }
     .exp-heat .wk { display:flex; flex-direction:column; gap:3px; }
     .exp-heat .cell { width:14px; height:14px; border-radius:3px; }
+    .exp-heat .cell.hit { cursor:pointer; }
+    .exp-heat .cell.hit:hover { outline:2px solid var(--text-muted); outline-offset:1px; }
     .exp-heat .cell.ghost { visibility:hidden; }
     .exp-heat-legend { display:flex; gap:4px; align-items:center; margin-top:8px; font-size:11px; color:var(--text-muted); }
     .exp-heat-legend .cell { width:14px; height:14px; border-radius:3px; }
