@@ -131,7 +131,8 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
   const CAT: Record<string, ExpenseCatStyle> = cfg.cats || {};
   const FALLBACK_COLOR = cfg.fallbackColor || "#b5bac2";
   const FALLBACK_ICON = cfg.fallbackIcon || "📦";
-  const TBL_LIMIT = cfg.tableLimit || 400;
+  // Rows per page in 明细 (was a hard 400-row cap; now paginated).
+  const PAGE_SIZE = 50;
 
   const colorOf = (c: string) => (CAT[c] && CAT[c].color) || FALLBACK_COLOR;
   const iconOf = (c: string) => (CAT[c] && CAT[c].icon) || FALLBACK_ICON;
@@ -267,6 +268,7 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
     q: "",
     sortKey: "date",
     sortDir: -1,
+    page: 0,
   };
   if (![...fileByDate.keys()].some((d) => d >= state.from && d <= state.to)) {
     state.from = minDate;
@@ -631,7 +633,7 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
         type: "text",
         placeholder: "搜索 项目 / 类目 / 渠道…",
         value: state.q,
-        oninput: (e: any) => { state.q = e.target.value; renderTableOnly(); },
+        oninput: (e: any) => { state.q = e.target.value; state.page = 0; renderTableOnly(); },
       }),
     );
     const catBar = el("div", { class: "exp-chips" });
@@ -687,10 +689,15 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
     const cdef = [["date", "日期"], ["item", "项目"], ["category", "类目"], ["channel", "渠道"], ["amount", "金额", "num"]];
     for (const [k, label, cls] of cdef)
       head.append(
-        el("th", { class: cls || "", onclick: () => { if (state.sortKey === k) state.sortDir *= -1; else { state.sortKey = k; state.sortDir = k === "amount" ? -1 : 1; } renderTableOnly(); } }, label + (state.sortKey === k ? (state.sortDir > 0 ? " ↑" : " ↓") : "")),
+        el("th", { class: cls || "", onclick: () => { if (state.sortKey === k) state.sortDir *= -1; else { state.sortKey = k; state.sortDir = k === "amount" ? -1 : 1; } state.page = 0; renderTableOnly(); } }, label + (state.sortKey === k ? (state.sortDir > 0 ? " ↑" : " ↓") : "")),
       );
     table.append(head);
-    for (const e of rows.slice(0, TBL_LIMIT)) {
+    const total = rows.length;
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (state.page >= pages) state.page = pages - 1;
+    if (state.page < 0) state.page = 0;
+    const pageRows = rows.slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
+    for (const e of pageRows) {
       table.append(
         el(
           "tr",
@@ -704,7 +711,24 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
       );
     }
     box.append(el("div", { class: "exp-tablewrap" }, table));
-    if (rows.length > TBL_LIMIT) box.append(el("div", { class: "exp-hint" }, `仅显示前 ${TBL_LIMIT} / 共 ${rows.length} 条`));
+    if (pages > 1) {
+      const go = (p: number) => { state.page = p; renderTableOnly(); };
+      const btn = (label: string, p: number, off: boolean) =>
+        el("button", { class: "pg", disabled: off ? "disabled" : null, onclick: off ? null : () => go(p) }, label);
+      const from1 = state.page * PAGE_SIZE + 1;
+      const to1 = Math.min((state.page + 1) * PAGE_SIZE, total);
+      box.append(
+        el(
+          "div",
+          { class: "exp-pager" },
+          btn("« 首页", 0, state.page <= 0),
+          btn("‹ 上一页", state.page - 1, state.page <= 0),
+          el("span", { class: "pg-info" }, `${from1}–${to1} / ${total} 笔　·　第 ${state.page + 1} / ${pages} 页`),
+          btn("下一页 ›", state.page + 1, state.page >= pages - 1),
+          btn("末页 »", pages - 1, state.page >= pages - 1),
+        ),
+      );
+    }
     return box;
   }
 
@@ -836,6 +860,7 @@ export async function mount(container: HTMLElement, opts: MountOpts): Promise<an
 
   // ---------- master render ----------
   function render() {
+    state.page = 0; // any full re-render (filter/period/drill/tab change) resets paging
     clear(root);
     root.append(periodBar());
     root.append(kpiBlock());
@@ -954,6 +979,11 @@ function injectStyle(accent: string, UP: string) {
     .exp-table .tm { color:var(--text-faint); font-size:11px; }
     .exp-table .ch { color:var(--text-muted); }
     .exp-table tr:hover td { background:var(--background-modifier-hover); }
+    .exp-pager { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px; margin-top:12px; }
+    .exp-pager .pg { border:1px solid var(--background-modifier-border); background:var(--background-primary); color:var(--text-normal); border-radius:8px; padding:4px 10px; cursor:pointer; font-size:12px; }
+    .exp-pager .pg:hover:not([disabled]) { background:var(--background-modifier-hover); }
+    .exp-pager .pg[disabled] { opacity:.4; cursor:default; }
+    .exp-pager .pg-info { font-size:12px; color:var(--text-muted); margin:0 6px; font-variant-numeric:tabular-nums; white-space:nowrap; }
     .exp-table tr.editable { cursor:pointer; }
     .exp-tag { padding:2px 9px; border-radius:11px; font-size:11px; font-weight:600; }
     .exp-table .sub { color:var(--text-muted); font-size:11px; }
