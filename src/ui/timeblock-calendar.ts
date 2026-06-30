@@ -444,6 +444,10 @@ export class TimeBlockCalendar {
     if (b.category && !cats.includes(b.category)) fCat.prepend(el("option", { value: b.category, selected: "selected" }, b.category));
     const fProj = el("input", { type: "text", style: FS, value: b.proj || "", placeholder: "项目 proj(可空)" }) as HTMLInputElement;
     const fDetail = el("textarea", { style: Object.assign({}, FS, { minHeight: "48px", resize: "vertical" }), placeholder: "备注 detail" }, b.detail || "") as HTMLTextAreaElement;
+    const fNote = el("textarea", { style: Object.assign({}, FS, { minHeight: "48px", resize: "vertical" }), placeholder: "原始日志内容 note" }, b.note || "") as HTMLTextAreaElement;
+    // 附件:每行一个文件名(与解析时存的名字一致),改这里即可把图片从一块移到另一块。
+    const fAttach = el("textarea", { style: Object.assign({}, FS, { minHeight: "40px", resize: "vertical", fontFamily: "var(--font-monospace)" }), placeholder: "每行一个附件文件名,如 IMG_1234.jpg" }, (b.attachments || []).join("\n")) as HTMLTextAreaElement;
+    const parseAttach = (s: string) => s.split("\n").map((x) => x.trim()).filter(Boolean);
     const fSOff = offSel(t0.off) as HTMLSelectElement,
       fST = el("input", { type: "text", style: FS, value: t0.hms, placeholder: "HH:MM:SS" }) as HTMLInputElement;
     const fEOff = offSel(t1.off) as HTMLSelectElement,
@@ -455,7 +459,7 @@ export class TimeBlockCalendar {
       if (start === null) { err.textContent = "开始时间不能为空"; return; }
       if (start === undefined || end === undefined) { err.textContent = "时间格式应为 HH:MM 或 HH:MM:SS"; return; }
       if (!fLabel.value.trim()) { err.textContent = "标题不能为空"; return; }
-      const e = { start, end, label: fLabel.value.trim(), category: fCat.value, proj: fProj.value.trim(), detail: fDetail.value.trim() };
+      const e = { start, end, label: fLabel.value.trim(), category: fCat.value, proj: fProj.value.trim(), detail: fDetail.value.trim(), note: fNote.value.trim(), attachments: parseAttach(fAttach.value) };
       try {
         isNew ? await this.addEntry(fDate.value, e) : await this.updateEntry(b._date, b._idx, e);
         overlay.remove();
@@ -484,6 +488,8 @@ export class TimeBlockCalendar {
         row("开始 start", fSOff, fST),
         row("结束 end", fEOff, fET),
         row("备注 detail", fDetail),
+        row("原文 note", fNote),
+        row("附件 attachments", fAttach),
         err,
         el("div", { style: { display: "flex", justifyContent: "space-between", marginTop: "10px" } }, isNew ? el("span") : el("button", { style: { color: "#e84f6b" }, onclick: del }, "删除"), el("span", {}, el("button", { style: { marginRight: "8px" }, onclick: () => overlay.remove() }, "取消"), el("button", { onclick: save }, "保存"))),
       ),
@@ -514,13 +520,13 @@ export class TimeBlockCalendar {
   async updateEntry(dateStr: string, idx: number, e: any) {
     const full = await this.fullForEdit(dateStr);
     full.blocks = full.blocks || [];
-    full.blocks[idx] = Object.assign({}, full.blocks[idx] || {}, { start: e.start, end: e.end, label: e.label, category: e.category, proj: e.proj, detail: e.detail, open_end: e.end == null });
+    full.blocks[idx] = Object.assign({}, full.blocks[idx] || {}, { start: e.start, end: e.end, label: e.label, category: e.category, proj: e.proj, detail: e.detail, note: e.note, attachments: e.attachments, open_end: e.end == null });
     await this.commitDay(dateStr, full);
   }
   async addEntry(dateStr: string, e: any) {
     const full = await this.fullForEdit(dateStr);
     full.blocks = full.blocks || [];
-    full.blocks.push({ start: e.start, end: e.end, label: e.label, category: e.category, proj: e.proj, detail: e.detail, background: false, inferred: false, confidence: "high", open_end: e.end == null, note: "", attachments: [] });
+    full.blocks.push({ start: e.start, end: e.end, label: e.label, category: e.category, proj: e.proj, detail: e.detail, background: false, inferred: false, confidence: "high", open_end: e.end == null, note: e.note || "", attachments: e.attachments || [] });
     full.blocks.sort((a: any, b: any) => (parseClock(a.start) || 0) - (parseClock(b.start) || 0));
     await this.commitDay(dateStr, full);
   }
